@@ -1,0 +1,30 @@
+config:
+  target: "http://localhost:8080"
+  phases:
+    - duration: 60        # seconds
+      arrivalRate: 10     # new VUs per second (start conservative)
+  engines:
+    socketio: {}
+  engineOptions:
+    socketio:
+      transports: ["websocket"]   # avoid long-polling upgrade flaps
+      reconnection: false          # prevent duplicate callbacks on errors
+      forceNew: true               # isolate connections per VU
+      path: "/socket.io"
+      timeout: 5000
+
+scenarios:
+  - name: "Socket.IO subscribe and receive ticks"
+    engine: socketio
+    flow:
+      - emit:
+          channel: "subscribe"
+          data:
+            - "BTC"
+            - "ETH"
+            - "SOL"
+            - "ADA"
+            - "XRP"
+      - think: 30  # keep connection open to receive pushes
+
+
